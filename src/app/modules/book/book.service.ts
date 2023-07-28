@@ -1,6 +1,11 @@
 import httpStatus from 'http-status';
+import { SortOrder } from 'mongoose';
 import ApiError from '../../../errors/apiError';
-import { IBookDetails, IReview } from './book.interface';
+import { paginationHelpers } from '../../../helpers/paginationHelper';
+import { IGenericResponse } from '../../../interfaces/common';
+import { IPaginationOptions } from '../../../interfaces/pagination';
+import { bookSearchableFields } from './book.constant';
+import { IBookDetails, IBookFilters, IReview } from './book.interface';
 import { Book } from './book.model';
 
 const addBook = async (
@@ -29,7 +34,65 @@ const addReveiw = async (
   return updatedBook;
 };
 
+const getAllBooks = async (
+  filters: IBookFilters,
+  paginationOptions: IPaginationOptions,
+): Promise<IGenericResponse<IBookDetails[]>> => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(paginationOptions);
+
+  const { searchTerm, ...filtersData } = filters;
+
+  const andConditions = [];
+
+  //  partial match
+  if (searchTerm) {
+    andConditions.push({
+      $or: bookSearchableFields.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    });
+  }
+
+  const sortConditions: { [key: string]: SortOrder } = {};
+
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder;
+  }
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
+
+  const result = await Book.find(whereConditions)
+    .populate('user')
+    .sort(sortConditions)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Book.countDocuments(whereConditions);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 export const BookService = {
   addBook,
   addReveiw,
+  getAllBooks,
 };
