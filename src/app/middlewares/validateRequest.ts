@@ -11,7 +11,7 @@ const validateRequest =
         params: req.params,
         cookies: req.cookies,
       });
-      return next(); // next middleware pathanor jonno -> routes ar
+      return next();
     } catch (error) {
       next(error);
     }
