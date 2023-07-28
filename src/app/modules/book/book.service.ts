@@ -34,6 +34,15 @@ const addReveiw = async (
   return updatedBook;
 };
 
+const getSingleBook = async (id: string): Promise<IBookDetails | null> => {
+  const book = await Book.findById({ _id: id });
+  if (!book) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Book does not exist');
+  }
+
+  return book;
+};
+
 const getAllBooks = async (
   filters: IBookFilters,
   paginationOptions: IPaginationOptions,
@@ -95,4 +104,5 @@ export const BookService = {
   addBook,
   addReveiw,
   getAllBooks,
+  getSingleBook,
 };

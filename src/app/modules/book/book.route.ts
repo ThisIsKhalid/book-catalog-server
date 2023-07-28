@@ -17,7 +17,7 @@ router.post(
   BookController.addReveiw,
 );
 
-router.get('/:id', BookController.addReveiw);
+router.get('/:id', BookController.getSingleBook);
 
 router.get('/', BookController.getAllBooks);
 

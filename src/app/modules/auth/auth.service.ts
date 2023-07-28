@@ -1,8 +1,12 @@
+import bcrypt from 'bcrypt';
 import httpStatus from 'http-status';
+import { Secret } from 'jsonwebtoken';
+import config from '../../../config';
 import ApiError from '../../../errors/apiError';
+import { jwtHelpers } from '../../../helpers/jwtHelper';
 import { IUser } from '../user/user.interface';
 import { User } from '../user/user.model';
-import bcrypt from 'bcrypt';
+import { ILoginUser, ILoginUserResponse } from './auth.interface';
 
 const createUser = async (userData: IUser): Promise<IUser | null> => {
   const result = await User.create(userData);
@@ -10,7 +14,7 @@ const createUser = async (userData: IUser): Promise<IUser | null> => {
   return result;
 };
 
-const loginUser = async (userData: IUser): Promise<IUser | null> => {
+const loginUser = async (userData: ILoginUser): Promise<ILoginUserResponse> => {
   const { email, password } = userData;
 
   const isUserExist = await User.findOne({ email }, { _id: 1, password: 1 });
@@ -27,8 +31,24 @@ const loginUser = async (userData: IUser): Promise<IUser | null> => {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Password does not match');
     }
   }
+  const { _id } = isUserExist;
 
-  return isUserExist;
+  const accessToken = jwtHelpers.createToken(
+    { _id },
+    config.jwt.secret as Secret,
+    config.jwt.expires_in as string,
+  );
+
+  const refreshToken = jwtHelpers.createToken(
+    { _id },
+    config.jwt.refresh_secret as Secret,
+    config.jwt.refresh_expires_in as string,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
 export const AuthService = {

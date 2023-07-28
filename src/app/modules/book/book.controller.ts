@@ -41,6 +41,20 @@ const addReveiw: RequestHandler = catchAsync(
   },
 );
 
+const getSingleBook: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = req.params.id;
+    const result = await BookService.getSingleBook(id);
+
+    sendResponse<IBookDetails>(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Book retrieved successfully!',
+      data: result,
+    });
+  },
+);
+
 const getAllBooks = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, bookFilterableFields);
   const paginationOptions = pick(req.query, paginationFields);
@@ -60,4 +74,5 @@ export const BookController = {
   addBook,
   addReveiw,
   getAllBooks,
+  getSingleBook,
 };
