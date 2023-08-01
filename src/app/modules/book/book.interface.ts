@@ -5,7 +5,7 @@ export type IReview = {
   rating: number;
   comment: string;
   reviewerEmail: string;
-  //   reviewDate: Date;
+  reviewerName: string;
 };
 
 export type IBookDetails = {

@@ -6,6 +6,7 @@ const ReviewSchema = new Schema<IReview>(
     rating: { type: Number, required: true },
     comment: { type: String, required: true },
     reviewerEmail: { type: String, required: true },
+    reviewerName: { type: String, required: true },
   },
   {
     timestamps: true,

@@ -32,6 +32,9 @@ const addReviewZodSchema = z.object({
     reviewerEmail: z.string({
       required_error: 'Email is required.',
     }),
+    reviewerName: z.string({
+      required_error: 'Name is required.',
+    }),
   }),
 });
 

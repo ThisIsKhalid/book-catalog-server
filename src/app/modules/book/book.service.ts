@@ -79,6 +79,8 @@ const getAllBooks = async (
   if (sortBy && sortOrder) {
     sortConditions[sortBy] = sortOrder;
   }
+  // console.log(sortBy);
+  // console.log(sortConditions);
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
