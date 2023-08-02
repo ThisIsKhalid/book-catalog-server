@@ -2,6 +2,7 @@ import express from 'express';
 import validateRequest from '../../middlewares/validateRequest';
 import { BookController } from './book.controller';
 import { BookValidation } from './book.validation';
+import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
@@ -17,7 +18,9 @@ router.post(
   BookController.addReveiw,
 );
 
-router.patch('/edit-book/:id', BookController.updateBook);
+router.patch('/edit-book/:id', auth(), BookController.updateBook);
+
+router.delete('/delete-book/:id', auth(), BookController.deleteBook);
 
 router.get('/:id', BookController.getSingleBook);
 

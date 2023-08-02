@@ -4,6 +4,7 @@ import ApiError from '../../../errors/apiError';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
+import { User } from '../user/user.model';
 import { bookSearchableFields } from './book.constant';
 import { IBookDetails, IBookFilters, IReview } from './book.interface';
 import { Book } from './book.model';
@@ -105,10 +106,56 @@ const getAllBooks = async (
 const updateBook = async (
   id: string,
   payload: Partial<IBookDetails>,
+  userEmail: string,
 ): Promise<IBookDetails | null> => {
+  const isUserExist = await User.findOne({ email: userEmail });
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
+  }
+
+  const isBookExist = await Book.findOne({ _id: id });
+  if (!isBookExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Book does not exist');
+  }
+
+  const isUserAuthorized =
+    isUserExist._id.toString() === isBookExist.user.toString();
+  // console.log(isUserAuthorized);
+
+  if (!isUserAuthorized) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+  }
+
   const result = await Book.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
+
+  return result;
+};
+
+const deleteBook = async (
+  id: string,
+  userEmail: string,
+): Promise<IBookDetails | null> => {
+  const isUserExist = await User.findOne({ email: userEmail });
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
+  }
+
+  const isBookExist = await Book.findOne({ _id: id });
+  if (!isBookExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Book does not exist');
+  }
+
+  const isUserAuthorized =
+    isUserExist._id.toString() === isBookExist.user.toString();
+  // console.log(isUserAuthorized);
+
+  if (!isUserAuthorized) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
+  }
+
+  const result = await Book.findOneAndDelete({ _id: id });
 
   return result;
 };
@@ -119,4 +166,5 @@ export const BookService = {
   getAllBooks,
   getSingleBook,
   updateBook,
+  deleteBook,
 };
