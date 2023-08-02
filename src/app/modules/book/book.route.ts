@@ -17,6 +17,8 @@ router.post(
   BookController.addReveiw,
 );
 
+router.patch('/edit-book/:id', BookController.updateBook);
+
 router.get('/:id', BookController.getSingleBook);
 
 router.get('/', BookController.getAllBooks);
